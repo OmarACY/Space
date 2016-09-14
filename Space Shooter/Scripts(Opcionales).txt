@@ -1,0 +1,72 @@
+//Forma mas efectiva para mover el jugador con touch o mouse
+	
+	public float dampingRadius;
+   	public float velocityLag;
+    	private Vector3 target;	
+
+	Vector3? touchPos = null;
+        if (Input.mousePresent && Input.GetMouseButton(0))
+        {
+            touchPos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0.0f);
+        }
+        else if (Input.touchCount > 0)
+        {
+            touchPos = new Vector3(Input.touches[0].position.x, Input.touches[0].position.y, 0.0f);
+        }
+        if (touchPos != null)
+        {
+            target = Camera.main.ScreenToWorldPoint(touchPos.Value);
+            target.y = rb.position.y;
+        }
+
+        Vector3 offset = target - rb.position;
+
+        float magnitude = offset.magnitude;
+        if (magnitude > dampingRadius)
+            magnitude = dampingRadius;
+        float dampening = magnitude / dampingRadius;
+
+        Vector3 desiredVelocity = offset.normalized * speed * dampening;
+
+        rb.velocity += (desiredVelocity - rb.velocity) * velocityLag;
+	
+	
+
+
+//Mover al jugador con las teclas
+
+	float moveHorizontal = Input.GetAxis ("Horizontal");
+        float moveVertical = Input.GetAxis ("Vertical");
+
+        Vector3 movement = new Vector3 (moveHorizontal, 0.0f, moveVertical);
+
+        Vector3 accelerationRaw = Input.acceleration;
+        Vector3 acceleration = FixAcceleration (accelerationRaw);
+        Vector3 movement = new Vector3 (acceleration.x, 0.0f, acceleration.y);
+        rb.velocity = movement * speed; //Fuerza para mover al jugador
+
+//Mover el jugador con el touchPad
+	
+	Vector2 direction = touchPad.GetDirection();
+        Vector3 movement = new Vector3(direction.x, 0.0f, direction.y);
+        rb.velocity = movement * speed; //Fuerza para mover al jugador
+
+//Mover el jugador con el mouse X y mouse Y o touch
+	 
+	float pointer_x = Input.GetAxis("Mouse X");
+        float pointer_y = Input.GetAxis("Mouse Y");
+        if (Input.touchCount > 0)
+        {
+            pointer_x = Input.touches[0].deltaPosition.x;
+            pointer_y = Input.touches[0].deltaPosition.y;
+        }
+	Vector3 movement = new Vector3 ( pointer_x.x, 0.0f, pointer_y.y);
+        rb.velocity = movement * speed; //Fuerza para mover al jugador
+
+//Otra forma de mover con touch
+
+	 if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
+        {
+            Vector3 movement = Input.GetTouch(0).deltaPosition;
+            transform.Translate(movement.x * speed, 0.0f, movement.y * speed);
+        }    
